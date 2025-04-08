@@ -1,41 +1,89 @@
-# Report: Analyzing SQL Query Generation Using Language Models on E-commerce Schema
+# 🧠 Analyzing SQL Query Generation Using Language Models on E-commerce Schema
 
-This report summarizes findings from a series of experiments conducted to evaluate the ability of a large language model to generate accurate SQL queries based on natural language questions, given a predefined e-commerce database schema.
+This report summarizes findings from a series of experiments designed to assess the ability of a large language model to generate accurate SQL queries from natural language questions (NLQs), based on a predefined **e-commerce database schema**.
 
-The evaluation was structured around a consistent template where natural language questions (NLQs) were embedded into a prompt containing:
+## 📋 Evaluation Setup
 
-- The database schema
-- Task instructions
-- Sample SQL queries
+Each prompt included:
+- The full database schema 🗃️  
+- Task instructions 🧾  
+- Sample natural language queries (NLQs) 💬  
+- Expected SQL query output 🧑‍💻  
 
-The generated SQL queries were extracted and analyzed for **syntactic correctness**, **semantic alignment** with the question, and **consistency** with the database schema.
-
----
-
-## ✅ Accuracy and Performance
-
-In most instances, the model successfully produced accurate and syntactically valid SQL queries.
-
-- **Example 1:** For the question _"Return the names of customers who bought products in the 'Electronics' category"_, the model correctly:
-  - Used JOINs across `customers`, `orders`, `order_items`, and `products`
-  - Applied filtering with `WHERE p.category = 'Electronics'`
-  - Used `DISTINCT` to eliminate duplicate customer names
-
-- **Example 2:** For _"Return the total amount spent by each customer"_, the model:
-  - Correctly used `SUM(o.total_amount)`
-  - Joined `customers` with `orders`
-  - Grouped by customer name
-
-These demonstrate the model’s capacity for handling **aggregations** and **multi-table relationships** effectively.
+The generated queries were analyzed for:
+- ✅ **Syntactic correctness**
+- 🎯 **Semantic alignment** with the NLQ
+- 🔗 **Consistency** with the database schema
 
 ---
 
-## ⚠️ Variations and Limitations
+## 📈 Accuracy and Performance
 
-While generally correct, a few notable issues were observed:
+In most cases, the model produced **accurate** and **syntactically valid** SQL queries.
 
-- **Inconsistent Outputs on Minor Changes:** When changing a query slightly (e.g., replacing `"Electronics"` with `"Clothing"`), the generated SQL sometimes reused old outputs or unrelated templates, failing to reflect the new condition (`WHERE p.category = 'Clothing'` missing).
-  
-- **Fragile String Extraction:** Using string parsing methods like:
-  ```python
-  SQL[0].split("```sql3")[-1].split("```")[0].split(";")[0].strip() + ";"
+### ✅ Successful Examples
+
+- **NLQ**: *"Return the names of customers who bought products in the 'Electronics' category."*  
+  **Result**:  
+  - Used correct `JOIN`s between `customers`, `orders`, `order_items`, and `products`.  
+  - Applied `WHERE p.category = 'Electronics'` and `DISTINCT` to avoid duplicates.
+
+- **NLQ**: *"Return the total amount spent by each customer."*  
+  **Result**:  
+  - Correctly aggregated `total_amount` from the `orders` table.  
+  - Used `GROUP BY` on customer names, yielding expected outcomes.
+
+These examples show the model's **strong grasp of SQL semantics** and table relationships.
+
+---
+
+## 🔄 Variations and Limitations
+
+Despite overall strong performance, some issues were observed:
+
+- 🔁 **Context Over-reliance**:  
+  Slight changes to the NLQ (e.g., changing "Electronics" to "Clothing") occasionally failed to update the `WHERE` clause, suggesting over-dependence on prior context.
+
+- 🧵 **Extraction Fragility**:  
+  When SQL was extracted from markdown (e.g., using `split("```sql3")[-1]`), any deviation from expected markdown formatting caused parsing errors. This revealed fragility in automated processes.
+
+---
+
+## 📌 Critical Observations
+
+### 💪 Strengths
+- Accurate use of:
+  - `JOIN`s
+  - Filtering with `WHERE`
+  - Aggregations with `SUM`, `GROUP BY`
+- Strong semantic alignment with the NLQs
+- Reliable performance when input structure matched training patterns
+
+### ⚠️ Weaknesses
+- Repeated outputs or incorrect reuse of previous answers
+- Markdown formatting sensitivity affecting automated parsing
+- Occasional hallucinations or misinterpretation in modified prompts
+
+---
+
+## 🧾 Conclusion
+
+The model demonstrates solid performance under:
+- Structured prompts
+- Clearly defined schema
+- Well-formatted examples
+
+However, it is sensitive to:
+- Input and format variations
+- Contextual bleed from previous prompts
+
+### 🔧 Recommendations for Future Work
+- Fine-tune on schema-specific data 📊  
+- Improve robustness in SQL extraction and post-processing 🛠️  
+- Implement prompt templates with dynamic schema integration  
+- Include fallback mechanisms in production systems 🔄
+
+---
+
+> 🔍 **Note**: Always validate outputs in production environments to ensure correctness and reliability.
+
